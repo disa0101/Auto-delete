@@ -1,0 +1,28 @@
+import logging
+from telegram.ext import CommandHandler, Filters, MessageHandler, Updater
+
+# установка уровня логирования
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                     level=logging.INFO)
+
+# определение функции-обработчика для команды /start
+def start(update, context):
+    context.bot.send_message(chat_id=update.message.chat_id, text='Привет! Я бот, который удаляет сообщения от зарегистрированных пользователей.')
+
+# определение функции-обработчика для сообщений от зарегистрированных пользователей
+def delete_messages(update, context):
+    user_id = update.message.from_user.id
+    registered_users = [123456789, 987654321] # список зарегистрированных пользователей
+    if user_id in registered_users:
+        update.message.delete() # удаление сообщения
+
+# создание объекта Updater и добавление обработчиков команд и сообщений
+updater = Updater(token='YOUR_TOKEN', use_context=True)
+dispatcher = updater.dispatcher
+start_handler = CommandHandler('start', start)
+delete_handler = MessageHandler(Filters.all & ~Filters.command, delete_messages)
+dispatcher.add_handler(start_handler)
+dispatcher.add_handler(delete_handler)
+
+# запуск бота
+updater.start_polling()
